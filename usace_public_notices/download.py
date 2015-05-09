@@ -1,16 +1,12 @@
 import os
 
-from django.conf import settings
-import vlermv
+from vlermv import cache
 
 from requests import get
 
-def cache(subdir, key_transformer = vlermv.transformers.magic):
-    d = os.path.join(settings.IMPORT_DIR, 'public_notices', subdir)
-    return vlermv.cache(d, key_transformer = key_transformer)
-
-@cache('feed', key_transformer = vlermv.transformers.archive(position = 'right'))
-def feed(site, max = 100000):
+DIR = '~/.usace-public-notices'
+@cache(parent_directory = DIR)
+def feed(date, site, max = 100000):
     '''
     Get the RSS feed. We can have fun by guessing site numbers.
 
@@ -24,10 +20,10 @@ def feed(site, max = 100000):
     }
     return get(url, params = params)
 
-@cache('summary')
+@cache(parent_directory = DIR)
 def summary(url):
     return get(url)
 
-@cache('attachment')
+@cache(parent_directory = DIR)
 def attachment(url):
     return get(url)
