@@ -22,5 +22,5 @@ def cli():
             sys.stderr.write('Aborting site number %d because of an exception\n' % site)
 
     with ThreadPoolExecutor(threads) as e:
-        for site in seed.sites_medium():
+        for site in seed.sites_medium:
             e.submit(f, site)
