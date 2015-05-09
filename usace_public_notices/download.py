@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 import vlermv
 
-from helpers import get
+from requests import get
 
 def cache(subdir, key_transformer = vlermv.transformers.magic):
     d = os.path.join(settings.IMPORT_DIR, 'public_notices', subdir)

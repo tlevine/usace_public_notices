@@ -4,7 +4,7 @@ from xml.etree.ElementTree import parse as parse_xml_fp
 from lxml.html import fromstring as parse_html
 
 from . import subparsers
-from ..lib.da_number import da_number
+from .da_number import da_number
 
 def feed(response):
     rss = parse_xml_fp(StringIO(response.text))
