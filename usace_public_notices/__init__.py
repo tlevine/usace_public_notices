@@ -17,6 +17,8 @@ def cli():
     def f(site):
         try:
             for record, attachments in public_notices(sites = [site]):
+                for _ in attachments:
+                    pass
                 sys.stdout.write(record['url'] + '\n')
         except:
             sys.stderr.write('Aborting site number %d because of an exception\n' % site)
