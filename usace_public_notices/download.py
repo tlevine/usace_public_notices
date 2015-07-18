@@ -5,7 +5,7 @@ from vlermv import cache
 from requests import get
 
 DIR = '~/.usace-public-notices'
-@cache(parent_directory = DIR)
+@cache(DIR, 'feed')
 def feed(date, site, max = 100000):
     '''
     Get the RSS feed. We can have fun by guessing site numbers.
@@ -20,10 +20,10 @@ def feed(date, site, max = 100000):
     }
     return get(url, params = params)
 
-@cache(parent_directory = DIR)
+@cache(DIR, 'summary')
 def summary(url):
     return get(url)
 
-@cache(parent_directory = DIR)
+@cache(DIR, 'attachment')
 def attachment(url):
     return get(url)
