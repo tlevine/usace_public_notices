@@ -1,3 +1,4 @@
+import warnings
 import re
 from io import StringIO
 from xml.etree.ElementTree import parse as parse_xml_fp
@@ -23,13 +24,33 @@ def summary(response):
     html = parse_html(response.text.replace('&nbsp;', ''))
     html.make_links_absolute(response.url)
 
-    title = str(html.xpath('//strong/a/text()')[0])
-    body = html.xpath('//div[@class="da_black"]')[0].text_content()
+    titles = html.xpath('//strong/a/text()')
+    if len(titles) == 1:
+        title = str(titles[0])
+    else:
+        title = ''
+        warnings.warn('Found no title in %s' % response.url)
+
+    bodies = html.xpath('//div[@class="da_black"]')
+    if len(bodies) == 1:
+        body = bodies[0].text_content()
+    else:
+        body = ''
+        warnings.warn('Found no body in %s' % response.url)
+
+    def xpath(query):
+        xs = html.xpath(query)
+        if len(xs) == 1:
+            return xs[0]
+        else:
+            warnings.warn('Found %d results for "%s", skipping' % (len(xs), query))
+            return ''
+
     record = {
         'article_id': subparsers.article_id(response.url),
         'url': response.url,
-        'post_date': subparsers.date(html.xpath('//em[contains(text(), "Posted:")]/text()')[0]),
-        'expiration_date': subparsers.date(html.xpath('//em[contains(text(), "Expiration date:")]/text()')[0]),
+        'post_date': subparsers.date(xpath('//em[contains(text(), "Posted:")]/text()')),
+        'expiration_date': subparsers.date(xpath('//em[contains(text(), "Expiration date:")]/text()')),
         'title': title,
         'body': body,
         'attachments': subparsers.attachments(html),

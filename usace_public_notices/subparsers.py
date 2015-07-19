@@ -80,10 +80,10 @@ def body(html, url = None):
             return 'INTRODUCTION' not in b
         if _probably_an_error(simple_body):
             if url:
-                msg = 'The body of %s could not be parsed:\n' % url
+                msg = 'The body of %s could not be parsed.'
             else:
-                msg = 'This body could not be parsed:\n'
-            warnings.warn(msg + simple_body)
+                msg = 'The body could not be parsed.'
+            warnings.warn(msg)
 
         return ('', '', '', simple_body)
 
