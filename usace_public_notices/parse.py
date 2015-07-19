@@ -1,3 +1,4 @@
+import re
 from io import StringIO
 from xml.etree.ElementTree import parse as parse_xml_fp
 
@@ -5,6 +6,13 @@ from lxml.html import fromstring as parse_html
 
 from . import subparsers
 from .da_number import da_number
+
+def subdomain(response):
+    rss = parse_xml_fp(StringIO(response.text))
+    domain = rss.findall('.//link')[0].findtext('.')
+    m = re.match(r'http://www.([a-z]+).usace.army.mil', domain)
+    if m:
+        return m.group(1)
 
 def feed(response):
     rss = parse_xml_fp(StringIO(response.text))
