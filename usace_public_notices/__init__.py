@@ -25,7 +25,7 @@ def cli():
                     pass
                 sys.stdout.write(record['url'] + '\n')
         except Exception as e:
-            sys.stderr.write('Aborting site number %d because of an exception\n' % site)
+            sys.stderr.write('Aborting site number %d because of an exception:\n%s\n' % (site, e))
 
     with ThreadPoolExecutor(threads) as e:
         for site in seed.sites_medium:
