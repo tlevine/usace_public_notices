@@ -1,4 +1,3 @@
-import warnings
 import re
 from io import StringIO
 from xml.etree.ElementTree import parse as parse_xml_fp

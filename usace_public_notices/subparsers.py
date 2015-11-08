@@ -1,12 +1,15 @@
-import datetime, re, warnings
+import datetime, re
 import itertools
+import logging
+
+logger = logging.getLogger(__name__)
 
 def date(raw):
     mmddyyyy = re.sub(r'[^:]+: *', '', raw)
     try:
         return datetime.datetime.strptime(mmddyyyy, '%m/%d/%Y').date()
     except ValueError:
-        warnings.warn('"%s" could not be parsed as a date.' % raw)
+        logger.warning('"%s" could not be parsed as a date.' % raw)
 
 HEADINGS = [
     ['NAME OF APPLICANT', 'NAME AND ADDRESS OF APPLICANT', 'NAME',
@@ -80,10 +83,10 @@ def body(html, url = None):
             return 'INTRODUCTION' not in b
         if _probably_an_error(simple_body):
             if url:
-                msg = 'The body of %s could not be parsed.'
+                msg = 'The body of %s could not be parsed.' % url
             else:
                 msg = 'The body could not be parsed.'
-            warnings.warn(msg)
+            logger.warning(msg)
 
         return ('', '', '', simple_body)
 
