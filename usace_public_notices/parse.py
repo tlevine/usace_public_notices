@@ -2,11 +2,14 @@ import warnings
 import re
 from io import StringIO
 from xml.etree.ElementTree import parse as parse_xml_fp
+import logging
 
 from lxml.html import fromstring as parse_html
 
 from . import subparsers
 from .da_number import da_number
+
+logger = logging.getLogger(__name__)
 
 def subdomain(response):
     rss = parse_xml_fp(StringIO(response.text))
@@ -29,21 +32,21 @@ def summary(response):
         title = str(titles[0])
     else:
         title = ''
-        warnings.warn('Found no title in %s' % response.url)
+        logger.warning('Found no title in %s' % response.url)
 
     bodies = html.xpath('//div[@class="da_black"]')
     if len(bodies) == 1:
         body = bodies[0].text_content()
     else:
         body = ''
-        warnings.warn('Found no body in %s' % response.url)
+        logger.warning('Found no body in %s' % response.url)
 
     def xpath(query):
         xs = html.xpath(query)
         if len(xs) == 1:
             return xs[0]
         else:
-            warnings.warn('Found %d results for "%s", skipping' % (len(xs), query))
+            logger.warning('Found %d results for "%s", skipping' % (len(xs), query))
             return ''
 
     record = {

@@ -14,9 +14,13 @@ def public_notices(sites = seed.sites_medium, today = datetime.date.today()):
                 yield record, (parse.attachment(download.attachment(x)) for x in xs)
 
 def cli():
+    import logging
     from concurrent.futures import ThreadPoolExecutor
     import sys
+
     threads = 15
+    logger = logging.getLogger(__name__)
+    logger.basicConfig(level = logging.WARNING)
 
     def f(site):
         try:
