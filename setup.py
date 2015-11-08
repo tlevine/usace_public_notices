@@ -9,6 +9,6 @@ setup(name='usace_public_notices',
       entry_points = {'console_scripts': ['usace-public-notices = usace_public_notices:cli']},
       install_requires = ['requests', 'vlermv>=1.3.0'],
       tests_require = ['pytest>=2.6.4'],
-      version='0.2.0',
+      version='0.2.1',
       license='AGPL',
 )
