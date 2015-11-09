@@ -18,12 +18,14 @@ def subdomain(response):
         return m.group(1)
 
 def feed(response):
+    namespaces = {'dc': 'http://purl.org/dc/elements/1.1/'}
     rss = parse_xml_fp(StringIO(response.text))
     for item in rss.findall('.//item'):
         yield {
             'url': item.findall('link')[0].findtext('.'),
             'title': item.findall('title')[0].findtext('.'),
             'description': item.findall('description')[0].findtext('.'),
+            'project_manager': item.findall('dc:creator', namespaces)[0].findtext('.').replace('.', ' ').title(),
         }
 
 def summary(response):
