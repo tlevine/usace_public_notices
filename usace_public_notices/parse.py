@@ -28,9 +28,9 @@ def feed(response):
 
     for item in rss.findall('.//item'):
         yield {
-            'url': item.findall('link')[0].findtext('.'),
-            'title': item.findall('title')[0].findtext('.'),
-            'description': item.findall('description')[0].findtext('.'),
+            'url': item.findtext('link'),
+            'title': item.findtext('title'),
+            'description': item.findtext('description'),
             'district_code': district_code,
             'district_name': district_name,
             'project_manager_name': item.findall('dc:creator', namespaces)[0].findtext('.').replace('.', ' ').title(),
