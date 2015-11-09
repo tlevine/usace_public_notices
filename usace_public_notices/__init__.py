@@ -8,8 +8,8 @@ def public_notices(sites = seed.sites_medium, today = datetime.date.today()):
         site_subdomain = parse.subdomain(r1)
         if site_subdomain:
             r2 = download.feed(today, site_subdomain, site_number)
-            for link in parse.feed(r2):
-                record = parse.summary(download.summary(link))
+            for record in parse.feed(r2):
+                record.update(parse.summary(download.summary(record['url'])))
                 xs = record.pop('attachments')
                 yield record, (parse.attachment(download.attachment(x)) for x in xs)
 

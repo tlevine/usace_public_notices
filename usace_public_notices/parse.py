@@ -19,8 +19,12 @@ def subdomain(response):
 
 def feed(response):
     rss = parse_xml_fp(StringIO(response.text))
-    for link in rss.findall('.//item/link'):
-        yield link.findtext('.')
+    for item in rss.findall('.//item'):
+        yield {
+            'url': item.findall('link')[0].findtext('.'),
+            'title': item.findall('title')[0].findtext('.'),
+            'description': item.findall('description')[0].findtext('.'),
+        }
 
 def summary(response):
     html = parse_html(response.text.replace('&nbsp;', ''))
@@ -50,10 +54,10 @@ def summary(response):
 
     record = {
         'article_id': subparsers.article_id(response.url),
-        'url': response.url,
+    #   'url': response.url,
         'post_date': subparsers.date(xpath('//em[contains(text(), "Posted:")]/text()')),
         'expiration_date': subparsers.date(xpath('//em[contains(text(), "Expiration date:")]/text()')),
-        'title': title,
+    #   'title': title,
         'body': body,
         'attachments': subparsers.attachments(html),
     }
