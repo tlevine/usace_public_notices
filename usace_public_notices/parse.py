@@ -25,7 +25,7 @@ def feed(response):
             'url': item.findall('link')[0].findtext('.'),
             'title': item.findall('title')[0].findtext('.'),
             'description': item.findall('description')[0].findtext('.'),
-            'project_manager': item.findall('dc:creator', namespaces)[0].findtext('.').replace('.', ' ').title(),
+            'project_manager_name': item.findall('dc:creator', namespaces)[0].findtext('.').replace('.', ' ').title(),
         }
 
 def summary(response):
