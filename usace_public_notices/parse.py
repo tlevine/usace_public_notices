@@ -19,12 +19,20 @@ def subdomain(response):
 
 def feed(response):
     namespaces = {'dc': 'http://purl.org/dc/elements/1.1/'}
+    
     rss = parse_xml_fp(StringIO(response.text))
+
+    # I guess findtext takes the first one. It would be nice to do this properly though.
+    district_code = re.match(r'.*\.([a-z]+).usace.*', rss.findtext('//link')).group(1)
+    district_name = rss.findtext('//title').replace(' Public Notices', '')
+
     for item in rss.findall('.//item'):
         yield {
             'url': item.findall('link')[0].findtext('.'),
             'title': item.findall('title')[0].findtext('.'),
             'description': item.findall('description')[0].findtext('.'),
+            'district_code': district_code,
+            'district_name': district_name,
             'project_manager_name': item.findall('dc:creator', namespaces)[0].findtext('.').replace('.', ' ').title(),
         }
 
