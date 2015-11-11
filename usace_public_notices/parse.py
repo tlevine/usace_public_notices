@@ -9,7 +9,6 @@ from . import subparsers
 from .da_number import da_number
 
 logger = logging.getLogger(__name__)
-HUC_NUMBER = re.compile(r'[^P]0*(\d{8})')
 
 def subdomain(response):
     rss = parse_xml_fp(StringIO(response.text))
@@ -69,9 +68,11 @@ def summary(response):
         'post_date': subparsers.date(xpath('//em[contains(text(), "Posted:")]/text()')),
         'expiration_date': subparsers.date(xpath('//em[contains(text(), "Expiration date:")]/text()')),
     #   'title': title,
-        'body': body,
+        'body': body.strip('\r\n '),
         'attachments': subparsers.attachments(html),
-        'hucs': re.findall(HUC_NUMBER, body),
+        'hucs': subparsers.hucs(body),
+        'cups': subparsers.cups(body),
+        'wqcs': subparsers.wqcs(body),
     }
 
     maybe_pan = da_number(title)
@@ -79,9 +80,9 @@ def summary(response):
         record.update(maybe_pan)
         applicant, location, character, leftover = subparsers.body(html, url = response.url)
         record.update({
-            'applicant': applicant,
-            'location': location,
-            'character': character,
+            'applicant': applicant.strip('\r\n '),
+            'location': location.strip('\r\n '),
+            'character': character.strip('\r\n '),
         })
     return record
 

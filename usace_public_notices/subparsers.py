@@ -1,6 +1,7 @@
 import datetime, re
 import itertools
 import logging
+from functools import partial
 
 logger = logging.getLogger(__name__)
 
@@ -100,3 +101,23 @@ def article_id(url, ARTICLE_ID =
         return int(m.group(2))
     else:
         raise ValueError('Could not parse article id from this:\n' + url)
+
+def _as_list(expr, text):
+    return list(sorted(set(re.findall(expr, text))))
+
+hucs = partial(_as_list, re.compile(r'[^P]0*(\d{8})'))
+cups = partial(_as_list, re.compile(r'\s(P\d{8})[^0-9]'))
+
+WQC_NUMBER = re.compile(r'WQCApplicationNumber[^0-9]*([0-9-]{8,})')
+def _wqcs(x):
+    wqc_numbers = _as_list(WQC_NUMBER, x)
+    for number in wqc_numbers:
+        no_hyphen = wqc_numbers[0].replace('-', '')
+        if len(no_hyphen) == 8:
+            # WQC number has the right length.
+            yield no_hyphen[:6] + '-' + no_hyphen[-2:]
+def wqcs(x):
+    return list(_wqcs(x))
+
+def _strip_ws(rawtext):
+    return re.sub(r'\s+', ' ', rawtext)
