@@ -9,6 +9,7 @@ from . import subparsers
 from .da_number import da_number
 
 logger = logging.getLogger(__name__)
+HUC_NUMBER = re.compile(r'[^P]0*(\d{8})')
 
 def subdomain(response):
     rss = parse_xml_fp(StringIO(response.text))
@@ -70,6 +71,7 @@ def summary(response):
     #   'title': title,
         'body': body,
         'attachments': subparsers.attachments(html),
+        'hucs': re.findall(HUC_NUMBER, body),
     }
 
     maybe_pan = da_number(title)
