@@ -29,7 +29,7 @@ def feed(response):
     for item in rss.findall('.//item'):
         yield {
             'url': item.findtext('link'),
-            'title': item.findtext('title'),
+            'permit_application_number': item.findtext('title'),
             'description': item.findtext('description'),
             'district_code': district_code,
             'district_name': district_name,
@@ -70,9 +70,9 @@ def summary(response):
     #   'title': title,
         'body': body.strip('\r\n '),
         'attachments': subparsers.attachments(html),
-        'hucs': subparsers.hucs(body),
-        'cups': subparsers.cups(body),
-        'wqcs': subparsers.wqcs(body),
+        'hydrologic_unit_codes': subparsers.hucs(body),
+        'coastal_use_permits': subparsers.cups(body),
+        'water_quality_certifications': subparsers.wqcs(body),
     }
 
     maybe_pan = da_number(title)
@@ -83,6 +83,12 @@ def summary(response):
             'applicant': applicant.strip('\r\n '),
             'location': location.strip('\r\n '),
             'character': character.strip('\r\n '),
+        })
+    else:
+        record.update({
+            'applicant': '',
+            'location': '',
+            'character': '',
         })
     return record
 
