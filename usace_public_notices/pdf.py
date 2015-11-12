@@ -100,7 +100,8 @@ def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
             continue
 
         if not {f, s} == {'N', 'W'}:
-            raise ValueError('Un-American directions in coordinates %s and %s' % (_first, _second))
+            warnings.warn('Skipping Un-American directions in coordinates %s and %s' % (_first, _second))
+            continue
         if f == 'N':
             first = _first
             second = _second

@@ -92,6 +92,7 @@ def summary(response):
         })
 
     fallbacks = pdf.parse(body)
+    record['longitude'] = record['latitude'] = None
     for k in fallbacks:
         if not record[k]:
             record[k] = fallbacks[k]
