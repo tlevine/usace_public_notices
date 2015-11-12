@@ -5,7 +5,7 @@ import logging
 
 from lxml.html import fromstring as parse_html
 
-from . import subparsers
+from . import subparsers, pdf
 from .da_number import da_number
 
 logger = logging.getLogger(__name__)
@@ -90,6 +90,11 @@ def summary(response):
             'location': '',
             'character': '',
         })
+
+    fallbacks = pdf.parse(body)
+    for k in fallbacks:
+        if not record[k]:
+            record[k] = fallbacks[k]
     return record
 
 def attachment(response):

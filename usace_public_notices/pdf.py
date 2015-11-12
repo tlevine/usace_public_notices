@@ -1,30 +1,22 @@
+import warnings
 import re
+
+from .subparsers import _strip_ws as strip_ws
 
 def parse(text):
     # Parse
-    doc = {}
-    # data['Acres'] = _read_acres(rawtext)
-    data.update(_read_terms(rawtext))
-    data['CUP'] = _read_cup_number(rawtext)
-    data['WQC'] = _read_wqc_number(rawtext)
-    data['Coords'] = _read_coords(rawtext)
-
-    if guess['WQC'] != '':
-        doc['WQC'] = guess['WQC']
-
-    if len(guess['CUP']) > 0:
-        doc['CUP'] = guess['CUP']
-
-    if len(guess['Coords']) > 0:
-        doc['latitude'], doc['longitude'] = guess['Coords'][0]
-
-    doc['locationOfWork'] = _location_of_work(text)
-    doc['characterOfWork'] = _character_of_work(text)
-
-    return doc
-
-
-
+    data = {
+        'coastal_use_permits': _read_cup_number(text),
+        'water_quality_certifications': _read_wqc_number(text),
+        'location': _location_of_work(text),
+        'character': _character_of_work(text),
+    }
+    coords = _read_coords(text)
+    if len(coords) > 0:
+        data['latitude'], data['longitude'] = coords[0]
+    if len(coords) > 1:
+        print('Multible coordinate pairs:', coords)
+    return data
 
 LOCATION_OF_WORK = re.compile(r'^.*(LOCATION OF WORK|LOCATION):.*$')
 CHARACTER_OF_WORK = re.compile(r'^.*(CHARACTER OF WORK|DESCRIPTION):.*$')
@@ -56,14 +48,9 @@ def _character_of_work(text):
             out.append(line)
     return ''.join(out)
 
-ACRES = re.compile(r'([0-9,.]+)acre')
-def _read_acres(rawtext):
-    raw = re.findall(ACRES, strip_ws(rawtext))
-    return [float(a.replace(',', '')) for a in raw]
-
 CUP_NUMBER = re.compile(r'\s(P\d{8})[^0-9]')
 def _read_cup_number(rawtext):
-    return set(re.findall(CUP_NUMBER, rawtext))
+    return list(sorted(set(re.findall(CUP_NUMBER, rawtext))))
 
 WQC_NUMBER = re.compile(r'WQCApplicationNumber[^0-9]*([0-9-]+)')
 def _read_wqc_number(rawtext):
@@ -73,14 +60,13 @@ def _read_wqc_number(rawtext):
     if len(wqc_numbers) > 1:
         raise AssertionError('Multiple WQC numbers found')
     elif len(wqc_numbers) == 0:
-        raise AssertionError('No WQC numbers found')
-
-    no_hyphen = wqc_numbers[0].replace('-', '')
-    if len(no_hyphen) != 8:
-        raise AssertionError('WQC number has the wrong length.')
-
-    return no_hyphen[:6] + '-' + no_hyphen[-2:]
-
+        warnings.warn('No WQC numbers found')
+    else:
+        no_hyphen = wqc_numbers[0].replace('-', '')
+        if len(no_hyphen) == 8:
+            return no_hyphen[:6] + '-' + no_hyphen[-2:]
+        else:
+            warnings.warn('WQC number has the wrong length.')
 
 MINUTE_COORDS = re.compile(r'(-?\d+)°(\d+)\'([0-9.]+)"([NW])')
 DECIMAL_COORDS = re.compile(r'(lat|latitude|long|longitude)[0-9.]+',
@@ -99,16 +85,28 @@ def _read_coords(rawtext, **kwargs):
 
 def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
     cleancoords = []
-    while len(rawcoords) > 0:
-        first = rawcoords.pop(0)
-        second = rawcoords.pop(0)
+    while len(rawcoords) >= 2:
+        _first = rawcoords.pop(0)
+        _second = rawcoords.pop(0)
 
-        f = first[-1]
-        s = second[-1]
-        if f != 'N':
-            raise ValueError('Wrong direction: %s' % f)
-        if s != 'W':
-            raise ValueError('Wrong direction: %s' % s)
+        f = _first[-1]
+        s = _second[-1]
+        try:
+            if f == s == 'N':
+                _second = rawcoords.pop(0)
+            elif f == s == 'W':
+                _first = rawcoords.pop(0)
+        except IndexError:
+            continue
+
+        if not {f, s} == {'N', 'W'}:
+            raise ValueError('Un-American directions in coordinates %s and %s' % (_first, _second))
+        if f == 'N':
+            first = _first
+            second = _second
+        else:
+            first = _second
+            second = _first
 
         # Handle sign
         s = int(second[0])
@@ -117,9 +115,9 @@ def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
 
         f = int(first[0])
         s = int(second[0])
-        if not 28 < f < 32:
+        if not -90 < f < 90:
             raise ValueError('Strange latitude: %d' % f)
-        if not 88 < s < 94:
+        if not -180 < s < 180:
             raise ValueError('Strange longitude: %d' % s)
 
 
@@ -131,9 +129,6 @@ def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
             cleancoords.append(latlng)
         else:
             cleancoords.append((lat, lng))
-
-        if verbose:
-            print lat, lng
 
     return cleancoords
 
