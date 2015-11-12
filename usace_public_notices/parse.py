@@ -1,5 +1,5 @@
 import re
-from io import StringIO
+from io import BytesIO
 from xml.etree.ElementTree import parse as parse_xml_fp
 import logging
 
@@ -11,7 +11,7 @@ from .da_number import da_number
 logger = logging.getLogger(__name__)
 
 def subdomain(response):
-    rss = parse_xml_fp(StringIO(response.text))
+    rss = parse_xml_fp(BytesIO(response.content))
     domain = rss.findall('.//link')[0].findtext('.')
     m = re.match(r'http://www.([a-z]+).usace.army.mil', domain)
     if m:
@@ -20,7 +20,7 @@ def subdomain(response):
 def feed(response):
     namespaces = {'dc': 'http://purl.org/dc/elements/1.1/'}
     
-    rss = parse_xml_fp(StringIO(response.text))
+    rss = parse_xml_fp(BytesIO(response.content))
 
     # I guess findtext takes the first one. It would be nice to do this properly though.
     district_code = re.match(r'.*\.([a-z]+).usace.*', rss.findtext('//link')).group(1)
@@ -37,7 +37,7 @@ def feed(response):
         }
 
 def summary(response):
-    html = parse_html(response.text.replace('&nbsp;', ''))
+    html = parse_html(response.content.replace(b'&nbsp;', b''))
     html.make_links_absolute(response.url)
 
     titles = html.xpath('//strong/a/text()')
