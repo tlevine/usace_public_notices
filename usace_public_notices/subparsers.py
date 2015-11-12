@@ -49,7 +49,10 @@ def body(html, url = None):
     '''
     result = []
     leftover = ''
-    simple_body = normalize_headings(html.xpath('//div[@class="da_black"]')[0].text_content())
+    da_black = html.xpath('//div[@class="da_black"]')
+    if len(da_black) == 0:
+        return ('', '', '', '')
+    simple_body = normalize_headings(da_black[0].text_content())
 
     paragraphs = (p.strip() for p in re.split(r'[\r\n]+', simple_body))
 
