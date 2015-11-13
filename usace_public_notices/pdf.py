@@ -15,7 +15,7 @@ def parse(text):
     if len(coords) > 0:
         data['latitude'], data['longitude'] = coords[0]
     if len(coords) > 1:
-        print('Multible coordinate pairs:', coords)
+        warnings.warn('Multible coordinate pairs:', coords)
     return data
 
 LOCATION_OF_WORK = re.compile(r'^.*(LOCATION OF WORK|LOCATION):.*$')
@@ -80,7 +80,6 @@ def _read_coords(rawtext, **kwargs):
         return _clean_minute_coords(rawcoords, **kwargs)
 
     rawcoordsd = re.findall(DECIMAL_COORDS, rawtext)
-    print(rawcoords, rawcoordsd)
     return _clean_minute_coords(rawcoordsd)
 
 def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
