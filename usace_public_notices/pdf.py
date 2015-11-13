@@ -15,7 +15,7 @@ def parse(text):
     if len(coords) > 0:
         data['latitude'], data['longitude'] = coords[0]
     if len(coords) > 1:
-        warnings.warn('Multible coordinate pairs:', coords)
+        warnings.warn('Multible coordinate pairs:\n%s' % coords)
     return data
 
 LOCATION_OF_WORK = re.compile(r'^.*(LOCATION OF WORK|LOCATION):.*$')
