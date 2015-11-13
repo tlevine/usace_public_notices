@@ -69,7 +69,7 @@ def _read_wqc_number(rawtext):
             warnings.warn('WQC number has the wrong length.')
 
 MINUTE_COORDS = re.compile(r'(?:lat|latitude|long|longitude)?(\d+)[°-](\d+)[\'-]([0-9.]+)[" ]([NW])')
-DECIMAL_COORDS = re.compile(r'(?:lat|latitude|long|longitude) ?([0-9.-]+)', flags = re.IGNORECASE)
+DECIMAL_COORDS = re.compile(r'(?:lat|latitude|long|longitude) ?(-?[0-9.]+)', flags = re.IGNORECASE)
 
 def _read_coords(rawtext, **kwargs):
     "Get coordinates from the notice."
@@ -80,7 +80,14 @@ def _read_coords(rawtext, **kwargs):
         return _clean_minute_coords(rawcoords, **kwargs)
 
     rawcoordsd = re.findall(DECIMAL_COORDS, rawtext)
-    return _clean_minute_coords(rawcoordsd)
+    out = []
+    for i in range(len(rawcoordsd)):
+        if i % 2 and i + 2 <= len(rawcoordsd):
+            try:
+                out.append(tuple(map(float, rawcoordsd[i:(i+2)])))
+            except ValueError:
+                pass
+    return out
 
 def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
     cleancoords = []
@@ -98,15 +105,12 @@ def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
         except IndexError:
             continue
 
-        if not {f, s} == {'N', 'W'}:
-            warnings.warn('Skipping Un-American directions in coordinates %s and %s' % (_first, _second))
-            continue
-        if f == 'N':
-            first = _first
-            second = _second
-        else:
+        if f == 'W' or s == 'N':
             first = _second
             second = _first
+        else:
+            first = _first
+            second = _second
 
         # Handle sign
         s = int(second[0])
