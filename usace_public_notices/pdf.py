@@ -69,18 +69,18 @@ def _read_wqc_number(rawtext):
             warnings.warn('WQC number has the wrong length.')
 
 MINUTE_COORDS = re.compile(r'(-?\d+)°(\d+)\'([0-9.]+)"([NW])')
-DECIMAL_COORDS = re.compile(r'(lat|latitude|long|longitude)[0-9.]+',
-    flags = re.IGNORECASE)
+DECIMAL_COORDS = re.compile(r'(?:lat|latitude|long|longitude)([0-9.-]+)', flags = re.IGNORECASE)
 
 def _read_coords(rawtext, **kwargs):
     "Get coordinates from the notice."
-    rawtext = strip_ws(rawtext)
+    rawtext = strip_ws(rawtext).replace(' ', '')
 
     rawcoords = re.findall(MINUTE_COORDS, rawtext)
     if len(rawcoords) > 0:
         return _clean_minute_coords(rawcoords, **kwargs)
 
     rawcoordsd = re.findall(DECIMAL_COORDS, rawtext)
+    print(rawcoordsd)
     return _clean_minute_coords(rawcoordsd)
 
 def _clean_minute_coords(rawcoords, decimal = True, verbose = False):
